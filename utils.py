@@ -105,3 +105,62 @@ class Wikis:
 
         return names
 
+
+def search_on_brainly(pergunta, getLink=False): # Scrapes Branly to find (homework) answers
+    source = ""
+    resposta = ""
+    answerLink = ""
+
+    # Get the source of the page, will only work if the question is a link
+    try:  
+        source = requests.get( pergunta ).text
+        print("It's a link")
+    
+    except Exception as e:
+        return "Por enquanto sou meio burro, favor fornecer o link da pergunta"
+        # If's not a link, then its a phrase
+        print(e)
+        
+        # Put the phase in the query url
+        responseLink = f"https://brainly.com.br/app/ask?entry=hero&q={ pergunta }"
+        
+        # Use Selenium to get the dinamicaly generated page
+        driver = Driver() 
+        source = driver.getPage(responseLink)
+
+        # Get a nice soup
+        soup = BeautifulSoup(source, "lxml")
+
+        # Find the first quesion
+        answerbox = soup.find("div", {"class": "js-page-wrapper"})
+        firstAnswerWrapper = answerbox.findseum("div", {"data-testid": "search-item-facade-wrapper"})
+        
+        # Get the href of the first question, and put it in the full link
+        answerId = firstAnswerWrapper.find(href=True)['href']
+        answerLink = f"https://brainly.com.br{ answerId }"
+        
+        # Get the source of the first answer
+        source = requests.get( answerLink ).text
+
+    # Get the soup of the answer
+    soup = BeautifulSoup(source, "lxml")
+    
+    # Find the answer component
+    answerBox = soup.find('div', {"data-test": "answer-box-text"})
+
+    # Get the answer text, and put a new line where a component id
+    # I'll have to format the text a little bit better sometime in the future
+    resposta = answerBox.get_text("\n")
+    
+    # Remove unecessary links, if they exist
+    try:
+        resposta = resposta[:resposta.index("Veja mais")]
+    except Exception as e:
+        print("Não tinha veja mais")
+    
+    link = f"Link: {answerLink}"
+    resposta = f"{resposta}{link if getLink else ''}"
+    print(resposta)
+
+    # return the answer
+    return resposta
