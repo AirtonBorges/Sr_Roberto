@@ -2,7 +2,7 @@ import discord
 import os
 from discord.ext import commands
 
-ROBERTO_KEY = os.getenv('SR_ROBERTO_API_KEY')
+ROBERTO_KEY = os.getenv('ROBERTO_KEY')
 
 client = commands.Bot(command_prefix=['<:strawHat_Pepe:632411513990152223> ', '<:strawHat_Pepe:632411513990152223>', ">"])
 
